@@ -23,8 +23,8 @@ import data_loaders
 import feature_logic
 import ray
 
-from hamilton import base, driver
-from hamilton.plugins import h_ray
+from hamilton import driver
+from hamilton.plugins import h_pandas, h_ray
 
 if __name__ == "__main__":
     logging.basicConfig(stream=sys.stdout)
@@ -34,7 +34,7 @@ if __name__ == "__main__":
     ray.init()
     # passing in execution to help set up the right nodes for the DAG
     config = {"location": "Absenteeism_at_work.csv", "execution": "normal"}
-    rga = h_ray.RayGraphAdapter(result_builder=base.PandasDataFrameResult())
+    rga = h_ray.RayGraphAdapter(result_builder=h_pandas.PandasDataFrameResult())
     dr = driver.Driver(
         config, data_loaders, feature_logic, adapter=rga
     )  # can pass in multiple modules

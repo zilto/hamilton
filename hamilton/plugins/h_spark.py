@@ -23,6 +23,7 @@ from hamilton.function_modifiers import subdag
 from hamilton.function_modifiers.recursive import with_columns_base
 from hamilton.htypes import custom_subclass_check
 from hamilton.lifecycle import base as lifecycle_base
+from hamilton.plugins import h_pandas
 from hamilton.plugins.pyspark_pandas_extensions import DATAFRAME_TYPE
 
 logger = logging.getLogger(__name__)
@@ -93,7 +94,7 @@ class SparkKoalasGraphAdapter(base.HamiltonGraphAdapter, base.ResultMixin):
         """
         self.spark_session = spark_session
         if not (
-            isinstance(result_builder, base.PandasDataFrameResult)
+            isinstance(result_builder, h_pandas.PandasDataFrameResult)
             or isinstance(result_builder, KoalasDataFrameResult)
             or isinstance(result_builder, base.DictResult)
         ):
@@ -159,7 +160,7 @@ class SparkKoalasGraphAdapter(base.HamiltonGraphAdapter, base.ResultMixin):
         for k, v in outputs.items():
             logger.info(f"Got column {k}, with type [{type(v)}].")
             df[k] = v
-        if isinstance(self.result_builder, base.PandasDataFrameResult):
+        if isinstance(self.result_builder, h_pandas.PandasDataFrameResult):
             return df.to_pandas()
         else:
             return df
@@ -422,7 +423,7 @@ def _lambda_udf(df: DataFrame, node_: node.Node, actual_kwargs: Dict[str, Any]) 
     return out
 
 
-class PySparkUDFGraphAdapter(base.SimplePythonDataFrameGraphAdapter):
+class PySparkUDFGraphAdapter(h_pandas.SimplePythonDataFrameGraphAdapter):
     """UDF graph adapter for PySpark.
 
     This graph adapter enables one to write Hamilton functions that can be executed as UDFs in PySpark.

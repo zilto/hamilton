@@ -3,7 +3,8 @@ import sys
 
 import pandas as pd
 
-from hamilton import base, driver
+from hamilton import driver
+from hamilton.plugins import h_pandas
 
 logging.basicConfig(stream=sys.stdout)
 
@@ -13,7 +14,12 @@ import my_functions
 
 # This uses the module above, but you can pass in as many as you want
 # In this case we want a dataframe output, but there are a host of other options
-dr = driver.Builder().with_modules(my_functions).with_adapters(base.PandasDataFrameResult()).build()
+dr = (
+    driver.Builder()
+    .with_modules(my_functions)
+    .with_adapters(h_pandas.PandasDataFrameResult())
+    .build()
+)
 
 # we need to specify what we want in the final results
 # These can be string names or function pointers (E.G. my_functions.spend_per_signup)

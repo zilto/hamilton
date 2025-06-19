@@ -2,8 +2,8 @@ import importlib
 
 import ray
 
-from hamilton import base, driver, log_setup
-from hamilton.plugins import h_ray
+from hamilton import driver, log_setup
+from hamilton.plugins import h_pandas, h_ray
 
 if __name__ == "__main__":
     log_setup.setup_logging()
@@ -19,7 +19,7 @@ if __name__ == "__main__":
         # 'spend': pd.Series([10, 10, 20, 40, 40, 50]),
         "spend_location": "some_other_path",
     }
-    rga = h_ray.RayGraphAdapter(result_builder=base.PandasDataFrameResult())
+    rga = h_ray.RayGraphAdapter(result_builder=h_pandas.PandasDataFrameResult())
     dr = driver.Driver(initial_columns, *modules, adapter=rga)  # can pass in multiple modules
     # we need to specify what we want in the final dataframe.
     output_columns = [

@@ -17,7 +17,8 @@ import named_model_feature_sets
 import pandas as pd
 import pydantic
 
-from hamilton import async_driver, base
+from hamilton import async_driver
+from hamilton.plugins import h_pandas
 
 app = fastapi.FastAPI()
 
@@ -58,7 +59,7 @@ invariant_feature_values = load_invariant_feature_values()
 dr = async_driver.AsyncDriver(
     {},  # no config/invariant inputs in this example.
     features,  # the module that contains the common feature definitions.
-    result_builder=base.SimplePythonDataFrameGraphAdapter(),
+    result_builder=h_pandas.SimplePythonDataFrameGraphAdapter(),
 )
 
 

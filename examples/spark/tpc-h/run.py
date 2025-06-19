@@ -7,7 +7,8 @@ import query_1
 import query_8
 import query_12
 
-from hamilton import base, driver
+from hamilton import driver
+from hamilton.plugins import h_pandas
 
 QUERIES = {"query_1": query_1, "query_8": query_8, "query_12": query_12}
 
@@ -18,7 +19,7 @@ def run_query(query: str, data_dir: str, visualize: bool = True):
     dr = (
         driver.Builder()
         .with_modules(QUERIES[query], csv_data_loaders)
-        .with_adapter(base.DefaultAdapter())
+        .with_adapter(h_pandas.DefaultAdapter())
         .build()
     )
     spark = pyspark.sql.SparkSession.builder.getOrCreate()

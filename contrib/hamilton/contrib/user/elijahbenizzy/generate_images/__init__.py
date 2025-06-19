@@ -38,12 +38,13 @@ def generated_image(image_prompt: str, size: str = "1024x1024", hd: bool = False
 if __name__ == "__main__":
     import __init__ as generate_images
 
-    from hamilton import base, driver
+    from hamilton import driver
+    from hamilton.plugins import h_pandas
 
     dr = driver.Driver(
         {},
         generate_images,
-        adapter=base.DefaultAdapter(),
+        adapter=h_pandas.DefaultAdapter(),
     )
     # saves to current working directory creating dag.png.
     dr.display_all_functions("dag", {"format": "png", "view": False}, show_legend=False)

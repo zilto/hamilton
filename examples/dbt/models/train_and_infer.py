@@ -1,7 +1,8 @@
 import pandas as pd
 from python_transforms import data_loader, feature_transforms, model_pipeline
 
-from hamilton import base, driver
+from hamilton import driver
+from hamilton.plugins import h_pandas
 
 
 def model(dbt, session):
@@ -15,7 +16,7 @@ def model(dbt, session):
     """
     raw_passengers_df = dbt.ref("raw_passengers")
     # Instantiate a simple graph adapter to get the base result
-    adapter = base.DefaultAdapter()
+    adapter = h_pandas.DefaultAdapter()
     # DAG for training/inferring on titanic data
     titanic_dag = driver.Driver(
         {

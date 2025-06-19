@@ -3,8 +3,9 @@ from typing import Any, Dict
 import pandas as pd
 import reusable_subdags
 
-from hamilton.base import ResultMixin, SimplePythonGraphAdapter
+from hamilton.base import ResultMixin
 from hamilton.driver import Driver
+from hamilton.plugins.h_pandas import SimplePythonGraphAdapter
 
 """A pretty simple pipeline to demonstrate function reuse.
 Note that this *also* demonstrates building a custom results builder!

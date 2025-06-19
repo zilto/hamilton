@@ -8,11 +8,12 @@ import pandas as pd
 import pytest
 
 from hamilton import ad_hoc_utils, base, driver, settings
-from hamilton.base import DefaultAdapter
 from hamilton.data_quality.base import DataValidationError, ValidationResult
 from hamilton.execution import executors, grouping
 from hamilton.function_modifiers import source, value
 from hamilton.io.materialization import from_, to
+from hamilton.plugins import h_pandas
+from hamilton.plugins.h_pandas import DefaultAdapter
 
 import tests.resources.data_quality
 import tests.resources.dynamic_config
@@ -438,7 +439,7 @@ def test_driver_validate_with_overrides():
     dr = (
         driver.Builder()
         .with_modules(tests.resources.overrides)
-        .with_adapter(base.DefaultAdapter())
+        .with_adapter(h_pandas.DefaultAdapter())
         .build()
     )
     assert dr.execute(["c"], overrides={"b": 1})["c"] == 2
@@ -448,7 +449,7 @@ def test_driver_validate_with_overrides_2():
     dr = (
         driver.Builder()
         .with_modules(tests.resources.overrides)
-        .with_adapter(base.DefaultAdapter())
+        .with_adapter(h_pandas.DefaultAdapter())
         .build()
     )
     assert dr.execute(["d"], overrides={"b": 1})["d"] == 3
@@ -458,7 +459,7 @@ def test_driver_validate_module_overrides():
     dr = (
         driver.Builder()
         .with_modules(tests.resources.overrides, tests.resources.overrides_from_module)
-        .with_adapter(base.DefaultAdapter())
+        .with_adapter(h_pandas.DefaultAdapter())
         .allow_module_overrides()
         .build()
     )
@@ -470,7 +471,7 @@ def test_driver_extra_inputs_can_be_outputs():
     dr = (
         driver.Builder()
         .with_modules(tests.resources.overrides)
-        .with_adapter(base.DefaultAdapter())
+        .with_adapter(h_pandas.DefaultAdapter())
         .build()
     )
     actual = dr.execute(["d", "e"], inputs={"a": 1, "e": 10})
@@ -483,7 +484,7 @@ def test_driver_extra_inputs_can_be_outputs():
     dr = (
         driver.Builder()
         .with_modules(tests.resources.example_module)
-        .with_adapter(base.PandasDataFrameResult())
+        .with_adapter(h_pandas.PandasDataFrameResult())
         .build()
     )
     actual = dr.execute(
@@ -506,7 +507,7 @@ def test_driver_v2_extra_inputs_can_be_outputs():
     dr = (
         driver.Builder()
         .with_modules(tests.resources.overrides)
-        .with_adapter(base.DefaultAdapter())
+        .with_adapter(h_pandas.DefaultAdapter())
         .enable_dynamic_execution(allow_experimental_mode=True)
         .build()
     )
@@ -520,7 +521,7 @@ def test_driver_fails_on_outputs_not_in_input():
     dr = (
         driver.Builder()
         .with_modules(tests.resources.overrides)
-        .with_adapter(base.DefaultAdapter())
+        .with_adapter(h_pandas.DefaultAdapter())
         .build()
     )
     with pytest.raises(ValueError):
@@ -533,7 +534,7 @@ def test_driver_v2_fails_on_outputs_not_in_input():
     dr = (
         driver.Builder()
         .with_modules(tests.resources.overrides)
-        .with_adapter(base.DefaultAdapter())
+        .with_adapter(h_pandas.DefaultAdapter())
         .enable_dynamic_execution(allow_experimental_mode=True)
         .build()
     )
@@ -547,7 +548,7 @@ def test_driver_v2_inputs_can_be_none():
     dr = (
         driver.Builder()
         .with_modules(tests.resources.overrides)
-        .with_adapter(base.DefaultAdapter())
+        .with_adapter(h_pandas.DefaultAdapter())
         .build()
     )
     actual = dr.execute(["d"], inputs=None, overrides={"b": 1})

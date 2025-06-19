@@ -17,7 +17,8 @@ from bytewax.connectors.stdio import StdOutput
 from bytewax.dataflow import Dataflow
 from components import aggregations, data_loaders, features, joins, model
 
-from hamilton import base, driver
+from hamilton import driver
+from hamilton.plugins import h_pandas
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -30,7 +31,7 @@ dr = driver.Driver(
     joins,
     features,
     model,
-    adapter=base.DefaultAdapter(),
+    adapter=h_pandas.DefaultAdapter(),
 )
 # pip install "sf-hamilton[visualization]" for this next line to work
 # dr.display_all_functions("streaming", {"format": "png"})

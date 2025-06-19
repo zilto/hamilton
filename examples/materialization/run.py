@@ -10,8 +10,9 @@ import os
 import data_loaders
 import model_training
 
-from hamilton import base, driver
+from hamilton import driver
 from hamilton.io.materialization import to
+from hamilton.plugins import h_pandas
 
 # This has to be imported, but the linter doesn't like it cause its unused
 # We just need to import it to register the materializers
@@ -48,7 +49,7 @@ if __name__ == "__main__":
     dag_config["data_loader"] = _data_set
     dr = (
         driver.Builder()
-        .with_adapter(base.DefaultAdapter())
+        .with_adapter(h_pandas.DefaultAdapter())
         .with_config(dag_config)
         .with_modules(data_loaders, model_training)
         .build()

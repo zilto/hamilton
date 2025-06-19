@@ -25,8 +25,8 @@ import data_loaders
 import feature_logic
 from dask.distributed import Client, LocalCluster
 
-from hamilton import base, driver
-from hamilton.plugins import h_dask
+from hamilton import driver
+from hamilton.plugins import h_dask, h_pandas
 
 if __name__ == "__main__":
     logging.basicConfig(stream=sys.stdout, level=logging.INFO)
@@ -38,7 +38,7 @@ if __name__ == "__main__":
     logger.info(client.cluster)
     # passing in execution to help set up the right nodes for the DAG
     config = {"location": "Absenteeism_at_work.csv", "execution": "normal"}
-    dga = h_dask.DaskGraphAdapter(client, base.PandasDataFrameResult())
+    dga = h_dask.DaskGraphAdapter(client, h_pandas.PandasDataFrameResult())
     dr = driver.Driver(
         config, data_loaders, feature_logic, adapter=dga
     )  # can pass in multiple modules

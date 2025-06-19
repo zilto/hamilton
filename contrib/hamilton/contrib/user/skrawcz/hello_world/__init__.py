@@ -55,12 +55,13 @@ if __name__ == "__main__":
     # run as a script to test Hamilton's execution
     import __init__ as hello_world
 
-    from hamilton import base, driver
+    from hamilton import driver
+    from hamilton.plugins import h_pandas
 
     dr = driver.Driver(
         {"default": "True"},
         hello_world,
-        adapter=base.DefaultAdapter(),
+        adapter=h_pandas.DefaultAdapter(),
     )
     # create the DAG image
     dr.display_all_functions("dag", {"format": "png", "view": False})

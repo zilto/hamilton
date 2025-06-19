@@ -180,12 +180,13 @@ if __name__ == "__main__":
     # run as a script to test Hamilton's execution
     import __init__ as text_summarization
 
-    from hamilton import base, driver
+    from hamilton import driver
+    from hamilton.plugins import h_pandas
 
     dr = driver.Driver(
         {"file_type": "pdf"},
         text_summarization,
-        adapter=base.DefaultAdapter(),
+        adapter=h_pandas.DefaultAdapter(),
     )
     # create the DAG image
     dr.display_all_functions("dag", {"format": "png", "view": False}, orient="TB")

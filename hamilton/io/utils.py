@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os
 import time
 from datetime import datetime
@@ -5,8 +7,6 @@ from os import PathLike
 from pathlib import Path
 from typing import Any, Dict, Union
 from urllib import parse
-
-import pandas as pd
 
 DATAFRAME_METADATA = "dataframe_metadata"
 SQL_METADATA = "sql_metadata"
@@ -54,7 +54,7 @@ def get_file_metadata(path: Union[str, Path, PathLike]) -> Dict[str, Any]:
     }
 
 
-def get_dataframe_metadata(df: pd.DataFrame) -> Dict[str, Any]:
+def get_dataframe_metadata(df) -> Dict[str, Any]:
     """Gives metadata from loading a dataframe.
 
     Note: we reserve the right to change this schema. So if you're using this come
@@ -89,7 +89,7 @@ def get_dataframe_metadata(df: pd.DataFrame) -> Dict[str, Any]:
     return {DATAFRAME_METADATA: metadata}
 
 
-def get_file_and_dataframe_metadata(path: str, df: pd.DataFrame) -> Dict[str, Any]:
+def get_file_and_dataframe_metadata(path: str, df) -> Dict[str, Any]:
     """Gives metadata from loading a file and a dataframe.
 
     Note: we reserve the right to change this schema. So if you're using this come
@@ -110,7 +110,7 @@ def get_file_and_dataframe_metadata(path: str, df: pd.DataFrame) -> Dict[str, An
     return {**get_file_metadata(path), **get_dataframe_metadata(df)}
 
 
-def get_sql_metadata(query_or_table: str, results: Union[int, pd.DataFrame]) -> Dict[str, Any]:
+def get_sql_metadata(query_or_table: str, results) -> Dict[str, Any]:
     """Gives metadata from reading a SQL table or writing to SQL db.
 
     Note: we reserve the right to change this schema. So if you're using this come
@@ -124,12 +124,18 @@ def get_sql_metadata(query_or_table: str, results: Union[int, pd.DataFrame]) -> 
     """
     query = query_or_table if "SELECT" in query_or_table else None
     table_name = query_or_table if "SELECT" not in query_or_table else None
+    rows = None
     if isinstance(results, int):
         rows = results
-    elif isinstance(results, pd.DataFrame):
-        rows = len(results)
     else:
-        rows = None
+        try:
+            import pandas as pd
+
+            if isinstance(results, pd.DataFrame):
+                rows = len(results)
+        except ImportError:
+            pass
+
     return {
         SQL_METADATA: {
             "rows": rows,

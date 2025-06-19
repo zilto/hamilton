@@ -7,6 +7,7 @@ import train_model
 from prefect import flow, task
 
 from hamilton import base, driver
+from hamilton.plugins import h_pandas
 
 
 # use the @task to define Prefect tasks, which adds logging, retries, etc.
@@ -49,7 +50,7 @@ def train_and_evaluate_model_task(
         hamilton_config,
         train_model,
         evaluate_model,
-        adapter=base.SimplePythonGraphAdapter(base.DictResult()),
+        adapter=h_pandas.SimplePythonGraphAdapter(base.DictResult()),
     )
 
     dr.execute(

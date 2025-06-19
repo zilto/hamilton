@@ -11,13 +11,14 @@ import model_pipeline
 import sets
 from sklearn import base as sk_base
 
-from hamilton import base, driver
+from hamilton import driver
+from hamilton.plugins import h_pandas
 
 
 def create_titanic_DAG_driver():
     """Creates a Driver object for the Titanic DAG."""
     config = {}  # Empty for this example.
-    adapter = base.DefaultAdapter()
+    adapter = h_pandas.DefaultAdapter()
     dr = driver.Driver(config, data_loading, features, sets, model_pipeline, adapter=adapter)
     return dr
 

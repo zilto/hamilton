@@ -257,10 +257,11 @@ def p_value(t_value: np.ndarray, dof: int) -> float:
 
 if __name__ == "__main__":
     import __main__ as analysis_flow
-    from hamilton import base, driver
+    from hamilton import driver
+    from hamilton.plugins import h_pandas
 
     # let's create a dictionary result -- since we want to get a few things from execution for inspection
-    adapter = base.DefaultAdapter()
+    adapter = h_pandas.DefaultAdapter()
     # adapter = base.SimplePythonGraphAdapter(base.NumpyMatrixResult())  # could also get a numpy matrix back.
     dr = driver.Driver(
         {

@@ -13,7 +13,7 @@ from pyspark.sql.functions import column
 from hamilton import base, driver, htypes, node
 from hamilton.function_modifiers.base import NodeInjector
 from hamilton.function_modifiers.recursive import prune_nodes
-from hamilton.plugins import h_spark
+from hamilton.plugins import h_pandas, h_spark
 from hamilton.plugins.h_spark import SparkInputValidator
 
 from .resources import example_module, smoke_screen_module
@@ -54,7 +54,7 @@ def test_koalas_spark_graph_adapter(spark_session):
         example_module,
         adapter=h_spark.SparkKoalasGraphAdapter(
             spark_session,
-            result_builder=base.PandasDataFrameResult(),
+            result_builder=h_pandas.PandasDataFrameResult(),
             spine_column="spend",
         ),
     )
@@ -88,7 +88,7 @@ def test_smoke_screen_module(spark_session):
         smoke_screen_module,
         adapter=h_spark.SparkKoalasGraphAdapter(
             spark_session,
-            result_builder=base.PandasDataFrameResult(),
+            result_builder=h_pandas.PandasDataFrameResult(),
             spine_column="weeks",
         ),
     )
@@ -406,7 +406,7 @@ def test_base_spark_executor_end_to_end(spark_session):
     dr = (
         driver.Builder()
         .with_modules(basic_spark_dag)
-        .with_adapter(base.SimplePythonGraphAdapter(base.DictResult()))
+        .with_adapter(h_pandas.SimplePythonGraphAdapter(base.DictResult()))
         .build()
     )
     # dr.visualize_execution(
@@ -429,7 +429,7 @@ def test_base_spark_executor_end_to_end_with_mode_select(spark_session):
     dr = (
         driver.Builder()
         .with_modules(basic_spark_dag)
-        .with_adapter(base.SimplePythonGraphAdapter(base.DictResult()))
+        .with_adapter(h_pandas.SimplePythonGraphAdapter(base.DictResult()))
         .with_config({"mode": "select"})
         .build()
     )
@@ -452,7 +452,7 @@ def test_base_spark_executor_end_to_end_with_select_decorator(spark_session):
     dr = (
         driver.Builder()
         .with_modules(basic_spark_dag)
-        .with_adapter(base.SimplePythonGraphAdapter(base.DictResult()))
+        .with_adapter(h_pandas.SimplePythonGraphAdapter(base.DictResult()))
         .with_config({"mode": "select_decorator"})
         .build()
     )
@@ -475,7 +475,7 @@ def test_base_spark_executor_end_to_end_external_dependencies(spark_session):
     dr = (
         driver.Builder()
         .with_modules(spark_dag_external_dependencies)
-        .with_adapter(base.SimplePythonGraphAdapter(base.DictResult()))
+        .with_adapter(h_pandas.SimplePythonGraphAdapter(base.DictResult()))
         .build()
     )
     dfs = dr.execute(
@@ -494,7 +494,7 @@ def test_base_spark_executor_end_to_end_multiple_with_columns(spark_session):
     dr = (
         driver.Builder()
         .with_modules(spark_dag_multiple_with_columns)
-        .with_adapter(base.SimplePythonGraphAdapter(base.DictResult()))
+        .with_adapter(h_pandas.SimplePythonGraphAdapter(base.DictResult()))
         .build()
     )
     df = dr.execute(["final"], inputs={"spark_session": spark_session})["final"].sort_index(axis=1)
@@ -768,7 +768,7 @@ def test_pyspark_mixed_pandas_udfs_end_to_end():
     dr = (
         driver.Builder()
         .with_modules(spark_dag_mixed_pyspark_pandas_udfs)
-        .with_adapter(base.SimplePythonGraphAdapter(base.DictResult()))
+        .with_adapter(h_pandas.SimplePythonGraphAdapter(base.DictResult()))
         .build()
     )
     # dr.visualize_execution(
@@ -810,7 +810,7 @@ def test_just_pyspark_udfs_end_to_end():
     dr = (
         driver.Builder()
         .with_modules(spark_dag_pyspark_udfs)
-        .with_adapter(base.SimplePythonGraphAdapter(base.DictResult()))
+        .with_adapter(h_pandas.SimplePythonGraphAdapter(base.DictResult()))
         .build()
     )
     # dr.visualize_execution(

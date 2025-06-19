@@ -5,7 +5,7 @@ from typing import Any, Collection, Dict, List, Tuple, Type
 import pandas as pd
 import pytest
 
-from hamilton import ad_hoc_utils, base, driver, graph, node
+from hamilton import ad_hoc_utils, driver, graph, node
 from hamilton.function_modifiers import base as fm_base
 from hamilton.function_modifiers import extract_fields, save_to, source, value
 from hamilton.function_modifiers.adapters import (
@@ -22,6 +22,7 @@ from hamilton.function_modifiers.base import DefaultNodeCreator
 from hamilton.htypes import custom_subclass_check
 from hamilton.io.data_adapters import DataLoader, DataSaver
 from hamilton.io.default_data_loaders import JSONDataSaver
+from hamilton.plugins import h_pandas
 from hamilton.registry import LOADER_REGISTRY
 
 
@@ -433,7 +434,7 @@ def test_load_from_decorator_json_file(source_):
     dr = driver.Driver(
         config,
         ad_hoc_utils.create_temporary_module(raw_json_data, number_employees, sum_age, mean_age),
-        adapter=base.DefaultAdapter(),
+        adapter=h_pandas.DefaultAdapter(),
     )
     result = dr.execute(
         ["mean_age"], inputs={"test_data": "tests/resources/data/test_load_from_data.json"}
@@ -459,7 +460,7 @@ def test_pandas_extensions_end_to_end(tmp_path_factory):
     dr = driver.Driver(
         config,
         ad_hoc_utils.create_temporary_module(df),
-        adapter=base.DefaultAdapter(),
+        adapter=h_pandas.DefaultAdapter(),
     )
     # run once to check that loading is correct
     result = dr.execute(

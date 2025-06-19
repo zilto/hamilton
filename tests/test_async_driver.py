@@ -17,6 +17,7 @@ from hamilton.lifecycle.base import (
     BasePreNodeExecute,
     BasePreNodeExecuteAsync,
 )
+from hamilton.plugins import h_pandas
 
 from .resources import simple_async_module
 
@@ -286,7 +287,7 @@ async def test_async_builder_result_builder_custom():
         return 1
 
     mod = ad_hoc_utils.create_temporary_module(foo)
-    result_builder = base.PandasDataFrameResult()
+    result_builder = h_pandas.PandasDataFrameResult()
     dr = await async_driver.Builder().with_adapters(result_builder).with_modules(mod).build()
     assert isinstance(await dr.execute(final_vars=["foo"]), pd.DataFrame)
 

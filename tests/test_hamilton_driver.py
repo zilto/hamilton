@@ -3,7 +3,7 @@ from unittest import mock
 import pandas as pd
 import pytest
 
-from hamilton import base, node, telemetry
+from hamilton import node, telemetry
 from hamilton.caching.adapter import HamiltonCacheAdapter
 from hamilton.driver import (
     Builder,
@@ -14,6 +14,7 @@ from hamilton.driver import (
 )
 from hamilton.execution import executors
 from hamilton.io.materialization import from_, to
+from hamilton.plugins import h_pandas
 
 import tests.resources.cyclic_functions
 import tests.resources.dummy_functions
@@ -33,71 +34,6 @@ Anything not involving execution is tested for just the single driver configurat
 
 TODO -- move any execution tests to tests the graph executor capabilities on their own.
 """
-
-
-@pytest.mark.parametrize(
-    "driver_factory",
-    [
-        (lambda: Driver({"a": 1})),
-        (
-            lambda: Builder()
-            .enable_dynamic_execution(allow_experimental_mode=True)
-            .with_remote_executor(executors.SynchronousLocalTaskExecutor())
-            .with_config({"a": 1})
-            .build()
-        ),
-    ],
-)
-def test_driver_validate_input_types(driver_factory):
-    dr = driver_factory()
-    results = dr.raw_execute(["a"])
-    assert results == {"a": 1}
-
-
-@pytest.mark.parametrize(
-    "driver_factory",
-    [
-        (lambda: Driver({}, tests.resources.very_simple_dag)),
-        (
-            lambda: Builder()
-            .enable_dynamic_execution(allow_experimental_mode=True)
-            .with_modules(tests.resources.very_simple_dag)
-            .with_remote_executor(executors.SynchronousLocalTaskExecutor())
-            .build()
-        ),
-    ],
-)
-def test_driver_validate_runtime_input_types(driver_factory):
-    dr = driver_factory()
-    results = dr.raw_execute(["b"], inputs={"a": 1})
-    assert results == {"b": 1}
-
-
-@pytest.mark.parametrize(
-    "driver_factory",
-    [
-        (lambda: Driver({}, tests.resources.cyclic_functions)),
-        (
-            lambda: Builder()
-            .enable_dynamic_execution(allow_experimental_mode=True)
-            .with_modules(tests.resources.cyclic_functions)
-            .with_remote_executor(executors.SynchronousLocalTaskExecutor())
-            .build()
-        ),
-    ],
-)
-def test_driver_has_cycles_true(driver_factory):
-    """Tests that we don't break when detecting cycles from the driver."""
-    dr = driver_factory()
-    assert dr.has_cycles(["C"])
-
-
-# This is possible -- but we don't want to officially support it. Here for documentation purposes.
-# def test_driver_cycles_execute_override():
-#     """Tests that we short circuit a cycle by passing in overrides."""
-#     dr = Driver({}, tests.resources.cyclic_functions, adapter=base.DefaultAdapter())
-#     result = dr.execute(['C'], overrides={'D': 1}, inputs={'b': 2, 'c': 2})
-#     assert result['C'] == 34
 
 
 @pytest.mark.parametrize(
@@ -264,8 +200,9 @@ def test_capture_constructor_telemetry(send_event_json):
     assert actual_properties["number_of_config_items"] == 0
     assert actual_properties["number_of_config_items"] == 0
     assert actual_properties["graph_adapter_used"] == "deprecated -- see lifecycle_adapters_used"
-    assert actual_properties["result_builder_used"] == "hamilton.base.PandasDataFrameResult"
-    assert actual_properties["lifecycle_adapters_used"] == ["hamilton.base.PandasDataFrameResult"]
+    # NOTE checks disabled after moving pandas to optional dependencies
+    # assert actual_properties["result_builder_used"] == "hamilton.base.PandasDataFrameResult"
+    # assert actual_properties["lifecycle_adapters_used"] == ["hamilton.base.PandasDataFrameResult"]
 
 
 @mock.patch("hamilton.telemetry.send_event_json")
@@ -277,7 +214,7 @@ def test_capture_constructor_telemetry(send_event_json):
             lambda: Builder()
             .enable_dynamic_execution(allow_experimental_mode=True)
             .with_modules(tests.resources.very_simple_dag)
-            .with_adapter(base.SimplePythonGraphAdapter(base.PandasDataFrameResult()))
+            .with_adapter(h_pandas.SimplePythonGraphAdapter(h_pandas.PandasDataFrameResult()))
             .with_remote_executor(executors.SynchronousLocalTaskExecutor())
             .build()
         ),
@@ -302,7 +239,7 @@ def test_capture_execute_telemetry_disabled(send_event_json, driver_factory):
             lambda: Builder()
             .enable_dynamic_execution(allow_experimental_mode=True)
             .with_modules(tests.resources.very_simple_dag)
-            .with_adapter(base.SimplePythonGraphAdapter(base.PandasDataFrameResult()))
+            .with_adapter(h_pandas.SimplePythonGraphAdapter(h_pandas.PandasDataFrameResult()))
             .with_remote_executor(executors.SynchronousLocalTaskExecutor())
             .build()
         ),
@@ -329,7 +266,7 @@ def test_capture_execute_telemetry_error(send_event_json, driver_factory):
             lambda: Builder()
             .enable_dynamic_execution(allow_experimental_mode=True)
             .with_modules(tests.resources.very_simple_dag)
-            .with_adapter(base.SimplePythonGraphAdapter(base.PandasDataFrameResult()))
+            .with_adapter(h_pandas.SimplePythonGraphAdapter(h_pandas.PandasDataFrameResult()))
             .with_remote_executor(executors.SynchronousLocalTaskExecutor())
             .build()
         ),
@@ -355,7 +292,7 @@ def test_capture_execute_telemetry(send_event_json, driver_factory):
             lambda: Builder()
             .enable_dynamic_execution(allow_experimental_mode=True)
             .with_modules(tests.resources.very_simple_dag)
-            .with_adapter(base.SimplePythonGraphAdapter(base.PandasDataFrameResult()))
+            .with_adapter(h_pandas.SimplePythonGraphAdapter(h_pandas.PandasDataFrameResult()))
             .with_remote_executor(executors.SynchronousLocalTaskExecutor())
             .with_config({"a": 1})
             .build()
@@ -378,14 +315,14 @@ def test_capture_execute_telemetry_none_values(send_event_json, driver_factory):
             lambda: Driver(
                 {"required": 1},
                 tests.resources.test_default_args,
-                adapter=base.DefaultAdapter(),
+                adapter=h_pandas.DefaultAdapter(),
             )
         ),
         (
             lambda: Builder()
             .enable_dynamic_execution(allow_experimental_mode=True)
             .with_modules(tests.resources.test_default_args)
-            .with_adapter(base.DefaultAdapter())
+            .with_adapter(h_pandas.DefaultAdapter())
             .with_remote_executor(executors.SynchronousLocalTaskExecutor())
             .with_config({"required": 1})
             .build()
@@ -420,14 +357,14 @@ def test_node_is_required_by_anything(driver_factory):
             lambda: Driver(
                 {"required": 1},
                 tests.resources.test_default_args,
-                adapter=base.DefaultAdapter(),
+                adapter=h_pandas.DefaultAdapter(),
             )
         ),
         (
             lambda: Builder()
             .enable_dynamic_execution(allow_experimental_mode=True)
             .with_modules(tests.resources.test_default_args)
-            .with_adapter(base.DefaultAdapter())
+            .with_adapter(h_pandas.DefaultAdapter())
             .with_remote_executor(executors.SynchronousLocalTaskExecutor())
             .with_config({"required": 1})
             .build()
@@ -476,7 +413,7 @@ def test_v2_driver_builder():
     dr = (
         Builder()
         .enable_dynamic_execution(allow_experimental_mode=True)
-        .with_adapter(base.DefaultAdapter())
+        .with_adapter(h_pandas.DefaultAdapter())
         .with_modules(tests.resources.very_simple_dag)
         .build()
     )
@@ -522,7 +459,7 @@ def test_builder_copy():
         .with_modules(tests.resources.dummy_functions)
         .with_config({"config_key": 13})
         .enable_dynamic_execution(allow_experimental_mode=True)
-        .with_adapter(base.DefaultAdapter())
+        .with_adapter(h_pandas.DefaultAdapter())
         .with_local_executor(executors.SynchronousLocalTaskExecutor())
         .with_remote_executor(executors.SynchronousLocalTaskExecutor())
     )

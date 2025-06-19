@@ -2,17 +2,13 @@ from __future__ import annotations
 
 import inspect
 import logging
-import typing
 from collections import Counter, defaultdict
 from typing import Any, Callable, Collection, Dict, List, Optional, Tuple, Type, Union
 
-import pandas as pd
-
-from hamilton import models, node
+from hamilton import node
 from hamilton.dev_utils.deprecation import deprecated
 from hamilton.function_modifiers import base
 from hamilton.function_modifiers.configuration import ConfigResolver, hamilton_exclude
-from hamilton.function_modifiers.delayed import resolve as delayed_resolve
 from hamilton.function_modifiers.dependencies import (
     LiteralDependency,
     SingleDependency,
@@ -233,85 +229,6 @@ def get_default_tags(fn: Callable) -> Dict[str, str]:
     """
     module_name = inspect.getmodule(fn).__name__
     return {"module": module_name}
-
-
-@deprecated(
-    warn_starting=(1, 20, 0),
-    fail_starting=(2, 0, 0),
-    use_this=delayed_resolve,
-    explanation="dynamic_transform has been replaced with @resolve -- a cleaner way"
-    "to utilize config for resolving decorators. Note this allows you to use any"
-    "existing decorators.",
-    current_version=(1, 19, 0),
-    migration_guide="https://hamilton.dagworks.io/en/latest/reference/decorators/",
-)
-class dynamic_transform(base.NodeCreator):
-    def __init__(
-        self,
-        transform_cls: Type[models.BaseModel],
-        config_param: str,
-        **extra_transform_params,
-    ):
-        """Constructs a model. Takes in a model_cls, which has to have a parameter."""
-        self.transform_cls = transform_cls
-        self.config_param = config_param
-        self.extra_transform_params = extra_transform_params
-
-    def validate(self, fn: Callable):
-        """Validates that the model works with the function -- ensures:
-        1. function has no code
-        2. function has no parameters
-        3. function has series as a return type
-        :param fn: Function to validate
-        :raises InvalidDecoratorException if the model is not valid.
-        """
-
-        ensure_function_empty(fn)  # it has to look exactly
-        signature = inspect.signature(fn)
-        if not issubclass(typing.get_type_hints(fn).get("return"), pd.Series):
-            raise base.InvalidDecoratorException(
-                "Models must declare their return type as a pandas Series"
-            )
-        if len(signature.parameters) > 0:
-            raise base.InvalidDecoratorException(
-                "Models must have no parameters -- all are passed in through the config"
-            )
-
-    def generate_nodes(self, fn: Callable, config: Dict[str, Any] = None) -> List[node.Node]:
-        if self.config_param not in config:
-            raise base.InvalidDecoratorException(
-                f"Configuration has no parameter: {self.config_param}. Did you define it? If so did you spell it right?"
-            )
-        fn_name = fn.__name__
-        transform = self.transform_cls(
-            config[self.config_param], fn_name, **self.extra_transform_params
-        )
-        return [
-            node.Node(
-                name=fn_name,
-                typ=typing.get_type_hints(fn).get("return"),
-                doc_string=fn.__doc__,
-                callabl=transform.compute,
-                input_types={dep: pd.Series for dep in transform.get_dependents()},
-                tags=get_default_tags(fn),
-            )
-        ]
-
-    def require_config(self) -> List[str]:
-        """Returns the configuration parameters that this model requires
-
-        :return: Just the one config param used by this model
-        """
-        return [self.config_param]
-
-
-class model(dynamic_transform):
-    """Model, same as a dynamic transform"""
-
-    def __init__(self, model_cls, config_param: str, **extra_model_params):
-        super(model, self).__init__(
-            transform_cls=model_cls, config_param=config_param, **extra_model_params
-        )
 
 
 NamespaceType = Union[str, EllipsisType, None]

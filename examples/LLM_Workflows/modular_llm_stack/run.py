@@ -6,7 +6,8 @@ import click
 import data_module
 import embedding_module
 
-from hamilton import base, driver
+from hamilton import driver
+from hamilton.plugins import h_pandas
 
 
 @click.command()
@@ -101,7 +102,7 @@ def main(
         data_module,
         vector_db_module,  # this points to one of the VectorDB modules
         embedding_module,
-        adapter=base.DefaultAdapter(),
+        adapter=h_pandas.DefaultAdapter(),
     )
 
     # The `final_vars` requested are functions with side-effects

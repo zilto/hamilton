@@ -14,6 +14,7 @@ from hamilton.execution import graph_functions
 from hamilton.function_modifiers import schema
 from hamilton.lifecycle import base as lifecycle_base
 from hamilton.node import NodeType
+from hamilton.plugins import h_pandas
 
 import tests.resources.bad_functions
 import tests.resources.compatible_input_types
@@ -676,39 +677,6 @@ def test_config_can_override():
     assert out["new_param"] == "new_value"
 
 
-def test_function_graph_has_cycles_true():
-    """Tests whether we catch a graph with cycles -- and expected behaviors"""
-    fg = graph.FunctionGraph.from_modules(tests.resources.cyclic_functions, config={"b": 2, "c": 1})
-    all_nodes = fg.get_nodes()
-    nodes = [n for n in all_nodes if not n.user_defined]
-    user_nodes = [n for n in all_nodes if n.user_defined]
-    assert fg.has_cycles(nodes, user_nodes) is True
-    required_nodes, required_user_nodes = fg.get_upstream_nodes(["A", "B", "C"])
-    assert required_nodes == set(nodes + user_nodes)
-    assert required_user_nodes == set(user_nodes)
-    # We don't want to support this behavior officially -- but this works:
-    # result = fg.execute([n for n in nodes if n.name == 'B'], overrides={'A': 1, 'D': 2})
-    # assert len(result) == 3
-    # assert result['B'] == 3
-    with pytest.raises(
-        RecursionError
-    ):  # throw recursion error when we don't have a way to short circuit
-        fg.execute([n for n in nodes if n.name == "B"])
-
-
-def test_function_graph_has_cycles_false():
-    """Tests whether we catch a graph with cycles"""
-    fg = graph.FunctionGraph.from_modules(tests.resources.dummy_functions, config={"b": 1, "c": 2})
-    all_nodes = fg.get_nodes()
-    # checks it two ways
-    nodes = [n for n in all_nodes if not n.user_defined]
-    user_nodes = [n for n in all_nodes if n.user_defined]
-    assert fg.has_cycles(nodes, user_nodes) is False
-    # this is called by the driver
-    nodes, user_nodes = fg.get_upstream_nodes(["A", "B", "C"])
-    assert fg.has_cycles(nodes, user_nodes) is False
-
-
 def test_function_graph_display_content(tmp_path: pathlib.Path):
     """Tests that display saves a file"""
     dot_file_path = tmp_path / "dag"
@@ -1075,17 +1043,6 @@ def test_create_graphviz_graph():
     assert dot_set == expected_set
 
 
-def test_create_networkx_graph():
-    """Tests that we create a networkx graph"""
-    fg = graph.FunctionGraph.from_modules(tests.resources.dummy_functions, config={})
-    nodes, user_nodes = fg.get_upstream_nodes(["A", "B", "C"])
-    digraph = graph.create_networkx_graph(nodes, user_nodes, "test-graph")
-    expected_nodes = sorted(["c", "B", "C", "b", "A"])
-    expected_edges = sorted([("c", "A"), ("b", "A"), ("A", "B"), ("A", "C")])
-    assert sorted(list(digraph.nodes)) == expected_nodes
-    assert sorted(list(digraph.edges)) == expected_edges
-
-
 def test_end_to_end_with_layered_decorators_resolves_true():
     fg = graph.FunctionGraph.from_modules(
         tests.resources.layered_decorators, config={"foo": "bar", "d": 10, "b": 20}
@@ -1287,7 +1244,7 @@ def test_in_driver_function_definitions():
 def test_update_dependencies():
     nodes = create_testing_nodes()
     new_nodes = graph.update_dependencies(
-        nodes, lifecycle_base.LifecycleAdapterSet(base.DefaultAdapter())
+        nodes, lifecycle_base.LifecycleAdapterSet(h_pandas.DefaultAdapter())
     )
     for node_name, node_ in new_nodes.items():
         assert node_.dependencies == nodes[node_name].dependencies

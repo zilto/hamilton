@@ -12,7 +12,6 @@ import time
 # required if we want to run this code stand alone.
 import typing
 import uuid
-from datetime import datetime
 from types import FunctionType, ModuleType
 from typing import (
     Any,
@@ -28,12 +27,9 @@ from typing import (
     Union,
 )
 
-import pandas as pd
-
 from hamilton import common, graph_types, htypes
 from hamilton.caching.adapter import HamiltonCacheAdapter
 from hamilton.caching.stores.base import MetadataStore, ResultStore
-from hamilton.dev_utils import deprecation
 from hamilton.execution import executors, graph_functions, grouping, state
 from hamilton.graph_types import HamiltonNode
 from hamilton.io import materialization
@@ -346,7 +342,13 @@ class Driver:
                 contains_result_builder = True
         if not contains_result_builder:
             if use_legacy_adapter:
-                adapter.append(base.PandasDataFrameResult())
+                try:
+                    import hamilton.plugins.h_pandas
+                except Exception as e:
+                    raise ImportError(
+                        "Failed to import Hamilton plugin `h_pandas` to use the legacy adapter. You need to install `pandas` dependency."
+                    ) from e
+                adapter.append(hamilton.plugins.h_pandas.PandasDataFrameResult())
         return lifecycle_base.LifecycleAdapterSet(*adapter)
 
     @staticmethod
@@ -610,11 +612,6 @@ class Driver:
             See constructor for how the GraphAdapter is initialized. The default one right now returns a pandas
             dataframe.
         """
-        if display_graph:
-            logger.warning(
-                "display_graph=True is deprecated. It will be removed in the 2.0.0 release. "
-                "Please use visualize_execution()."
-            )
         start_time = time.time()
         run_id = str(uuid.uuid4())
         run_successful = True
@@ -712,89 +709,6 @@ class Driver:
                 if logger.isEnabledFor(logging.DEBUG):
                     logger.debug(f"Error caught in processing telemetry: \n{e}")
 
-    @deprecation.deprecated(
-        warn_starting=(1, 0, 0),
-        fail_starting=(2, 0, 0),
-        use_this=None,
-        explanation="This has become a private method and does not guarantee that all the adapters work correctly.",
-        migration_guide="Don't use this entry point for execution directly. Always go through `.execute()`or `.materialize()`.",
-    )
-    def raw_execute(
-        self,
-        final_vars: List[str],
-        overrides: Dict[str, Any] = None,
-        display_graph: bool = False,
-        inputs: Dict[str, Any] = None,
-        _fn_graph: graph.FunctionGraph = None,
-    ) -> Dict[str, Any]:
-        """Raw execute function that does the meat of execute.
-
-        Don't use this entry point for execution directly. Always go through `.execute()` or `.materialize()`.
-        In case you are using `.raw_execute()` directly, please switch to `.execute()` using a
-        `base.DictResult()`. Note: `base.DictResult()` is the default return of execute if you are
-        using the `driver.Builder()` class to create a `Driver()` object.
-
-        :param final_vars: Final variables to compute
-        :param overrides: Overrides to run.
-        :param display_graph: DEPRECATED. DO NOT USE. Whether or not to display the graph when running it
-        :param inputs: Runtime inputs to the DAG
-        :return:
-        """
-        function_graph = _fn_graph if _fn_graph is not None else self.graph
-        run_id = str(uuid.uuid4())
-        nodes, user_nodes = function_graph.get_upstream_nodes(final_vars, inputs, overrides)
-        Driver.validate_inputs(
-            function_graph, self.adapter, user_nodes, inputs, nodes
-        )  # TODO -- validate within the function graph itself
-        if display_graph:  # deprecated flow.
-            logger.warning(
-                "display_graph=True is deprecated. It will be removed in the 2.0.0 release. "
-                "Please use visualize_execution()."
-            )
-            self.visualize_execution(final_vars, "test-output/execute.gv", {"view": True})
-            if self.has_cycles(
-                final_vars, function_graph
-            ):  # here for backwards compatible driver behavior.
-                raise ValueError("Error: cycles detected in your graph.")
-        all_nodes = nodes | user_nodes
-        self.graph_executor.validate(list(all_nodes))
-        if self.adapter.does_hook("pre_graph_execute", is_async=False):
-            self.adapter.call_all_lifecycle_hooks_sync(
-                "pre_graph_execute",
-                run_id=run_id,
-                graph=function_graph,
-                final_vars=final_vars,
-                inputs=inputs,
-                overrides=overrides,
-            )
-        results = None
-        error = None
-        success = False
-        try:
-            results = self.graph_executor.execute(
-                function_graph,
-                final_vars,
-                overrides if overrides is not None else {},
-                inputs if inputs is not None else {},
-                run_id,
-            )
-            success = True
-        except Exception as e:
-            error = e
-            success = False
-            raise e
-        finally:
-            if self.adapter.does_hook("post_graph_execute", is_async=False):
-                self.adapter.call_all_lifecycle_hooks_sync(
-                    "post_graph_execute",
-                    run_id=run_id,
-                    graph=function_graph,
-                    success=success,
-                    error=error,
-                    results=results,
-                )
-        return results
-
     def __raw_execute(
         self,
         final_vars: List[str],
@@ -820,16 +734,6 @@ class Driver:
         Driver.validate_inputs(
             function_graph, self.adapter, user_nodes, inputs, nodes
         )  # TODO -- validate within the function graph itself
-        if display_graph:  # deprecated flow.
-            logger.warning(
-                "display_graph=True is deprecated. It will be removed in the 2.0.0 release. "
-                "Please use visualize_execution()."
-            )
-            self.visualize_execution(final_vars, "test-output/execute.gv", {"view": True})
-            if self.has_cycles(
-                final_vars, function_graph
-            ):  # here for backwards compatible driver behavior.
-                raise ValueError("Error: cycles detected in your graph.")
         all_nodes = nodes | user_nodes
         self.graph_executor.validate(list(all_nodes))
         results = None
@@ -1128,24 +1032,6 @@ class Driver:
         hamilton_nodes = [HamiltonNode.from_node(n).as_dict() for n in all_nodes]
         sorted_nodes = sorted(hamilton_nodes, key=lambda x: x["name"])
         return json.dumps({"nodes": sorted_nodes})
-
-    @capture_function_usage
-    def has_cycles(
-        self,
-        final_vars: List[Union[str, Callable, Variable]],
-        _fn_graph: graph.FunctionGraph = None,
-    ) -> bool:
-        """Checks that the created graph does not have cycles.
-
-        :param final_vars: the outputs we want to compute.
-        :param _fn_graph: the function graph to check for cycles, used internally
-        :return: boolean True for cycles, False for no cycles.
-        """
-        function_graph = _fn_graph if _fn_graph is not None else self.graph
-        _final_vars = self._create_final_vars(final_vars)
-        # get graph we'd be executing over
-        nodes, user_nodes = function_graph.get_upstream_nodes(_final_vars)
-        return self.graph.has_cycles(nodes, user_nodes)
 
     @capture_function_usage
     def what_is_downstream_of(self, *node_names: str) -> List[Variable]:
@@ -2212,42 +2098,3 @@ class Builder:
         new_builder.remote_executor = self.remote_executor
         new_builder.grouping_strategy = self.grouping_strategy
         return new_builder
-
-
-if __name__ == "__main__":
-    """some example test code"""
-    import importlib
-
-    formatter = logging.Formatter("[%(levelname)s] %(asctime)s %(name)s(%(lineno)s): %(message)s")
-    stream_handler = logging.StreamHandler(sys.stdout)
-    stream_handler.setFormatter(formatter)
-    logger.addHandler(stream_handler)
-    logger.setLevel(logging.INFO)
-
-    if len(sys.argv) < 2:
-        logger.error("No modules passed")
-        sys.exit(1)
-    logger.info(f"Importing {sys.argv[1]}")
-    module = importlib.import_module(sys.argv[1])
-
-    x = pd.date_range("2019-01-05", "2020-12-31", freq="7D")
-    x.index = x
-
-    dr = Driver(
-        {
-            "VERSION": "kids",
-            "as_of": datetime.strptime("2019-06-01", "%Y-%m-%d"),
-            "end_date": "2020-12-31",
-            "start_date": "2019-01-05",
-            "start_date_d": datetime.strptime("2019-01-05", "%Y-%m-%d"),
-            "end_date_d": datetime.strptime("2020-12-31", "%Y-%m-%d"),
-            "segment_filters": {"business_line": "womens"},
-        },
-        module,
-    )
-    df = dr.execute(
-        ["date_index", "some_column"],
-        # ,overrides={'DATE': pd.Series(0)}
-        display_graph=False,
-    )
-    print(df)

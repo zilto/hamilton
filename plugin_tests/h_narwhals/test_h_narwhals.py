@@ -1,7 +1,7 @@
 import json
 
-from hamilton import base, driver
-from hamilton.plugins import h_narwhals, h_polars
+from hamilton import driver
+from hamilton.plugins import h_narwhals, h_pandas, h_polars
 
 from .resources import narwhals_example
 
@@ -14,7 +14,7 @@ def test_pandas():
         .with_modules(narwhals_example)
         .with_adapters(
             h_narwhals.NarwhalsAdapter(),
-            h_narwhals.NarwhalsDataFrameResultBuilder(base.PandasDataFrameResult()),
+            h_narwhals.NarwhalsDataFrameResultBuilder(h_pandas.PandasDataFrameResult()),
         )
         .build()
     )

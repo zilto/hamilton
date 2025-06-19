@@ -3,7 +3,8 @@
 import spark_pdf_pipeline
 from pyspark.sql import SparkSession
 
-from hamilton import base, driver, log_setup
+from hamilton import driver, log_setup
+from hamilton.plugins import h_pandas
 
 
 def my_spark_job(spark: SparkSession, openai_gpt_model: str, content_type: str, user_query: str):
@@ -18,7 +19,7 @@ def my_spark_job(spark: SparkSession, openai_gpt_model: str, content_type: str, 
         driver.Builder()
         .with_config({"file_type": "pdf"})
         .with_modules(spark_pdf_pipeline)
-        .with_adapter(base.DefaultAdapter())
+        .with_adapter(h_pandas.DefaultAdapter())
         .build()
     )
     # create inputs to the UDFs - this needs to be column_name -> spark dataframe.

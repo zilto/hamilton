@@ -10,12 +10,13 @@ import features
 import model_pipeline
 import sets
 
-from hamilton import base, driver
+from hamilton import driver
+from hamilton.plugins import h_pandas
 
 # Determine configuration for creating the DAG.
 config = {}  # This example has no configuration.
 # instantiate the driver
-adapter = base.DefaultAdapter()
+adapter = h_pandas.DefaultAdapter()
 dr = driver.Driver(config, data_loading, features, sets, model_pipeline, adapter=adapter)
 
 # --- (1) What sequence of operations produced this data/model? ---

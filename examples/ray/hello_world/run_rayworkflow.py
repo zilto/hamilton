@@ -1,8 +1,8 @@
 import ray
 from ray import workflow
 
-from hamilton import base, driver, log_setup
-from hamilton.plugins import h_ray
+from hamilton import driver, log_setup
+from hamilton.plugins import h_pandas, h_ray
 
 if __name__ == "__main__":
     log_setup.setup_logging()
@@ -20,7 +20,7 @@ if __name__ == "__main__":
         "spend_location": "some_other_path",
     }
     rga = h_ray.RayWorkflowGraphAdapter(
-        result_builder=base.PandasDataFrameResult(),
+        result_builder=h_pandas.PandasDataFrameResult(),
         # Ray will resume a run if possible based on workflow id
         workflow_id="hello-world-123",
     )

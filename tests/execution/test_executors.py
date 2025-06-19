@@ -5,7 +5,7 @@ import numpy as np
 import pytest
 
 import hamilton.ad_hoc_utils
-from hamilton import base, driver
+from hamilton import driver
 from hamilton.execution.executors import (
     DefaultExecutionManager,
     MultiProcessingExecutor,
@@ -22,6 +22,7 @@ from hamilton.execution.grouping import (
 )
 from hamilton.htypes import Collect, Parallelizable
 from hamilton.lifecycle import base as lifecycle_base
+from hamilton.plugins import h_pandas
 
 from tests.resources.dynamic_parallelism import (
     inputs_in_collect,
@@ -32,7 +33,7 @@ from tests.resources.dynamic_parallelism import (
     parallel_linear_basic,
 )
 
-ADAPTER = base.DefaultAdapter()
+ADAPTER = h_pandas.DefaultAdapter()
 
 
 def multi_processing_executor_factory():
@@ -341,7 +342,7 @@ def test_parallel_end_to_end_with_empty_list():
         .with_modules(parallel_linear_basic)
         .enable_dynamic_execution(allow_experimental_mode=True)
         .with_remote_executor(SynchronousLocalTaskExecutor())
-        .with_adapter(base.DefaultAdapter())
+        .with_adapter(h_pandas.DefaultAdapter())
         .build()
     )
     parallel_collect_multiple_arguments._reset_counter()

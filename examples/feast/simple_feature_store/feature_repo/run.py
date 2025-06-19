@@ -2,6 +2,7 @@ import store_definitions
 import store_operations
 
 from hamilton import base, driver
+from hamilton.plugins import h_pandas
 
 
 def main():
@@ -9,7 +10,7 @@ def main():
         dict(feast_repository_path=".", feast_config={}),
         store_operations,
         store_definitions,
-        adapter=base.SimplePythonGraphAdapter(base.DictResult()),
+        adapter=h_pandas.SimplePythonGraphAdapter(base.DictResult()),
     )
 
     final_vars = [

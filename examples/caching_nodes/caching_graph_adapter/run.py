@@ -5,8 +5,9 @@ import sys
 import business_logic
 import data_loaders
 
-from hamilton import base, driver
+from hamilton import driver
 from hamilton.experimental import h_cache
+from hamilton.plugins import h_pandas
 
 logging.basicConfig(stream=sys.stdout)
 
@@ -15,7 +16,7 @@ initial_columns = {}
 
 cache_path = "tmp"
 pathlib.Path(cache_path).mkdir(exist_ok=True)
-adapter = h_cache.CachingGraphAdapter(cache_path, base.PandasDataFrameResult())
+adapter = h_cache.CachingGraphAdapter(cache_path, h_pandas.PandasDataFrameResult())
 dr = driver.Driver(initial_columns, business_logic, data_loaders, adapter=adapter)
 output_columns = [
     data_loaders.spend,

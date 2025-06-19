@@ -15,6 +15,7 @@ from hamilton.driver import Variable
 from hamilton.io import materialization
 from hamilton.lifecycle.base import BaseDoNodeExecute
 from hamilton.node import Node
+from hamilton.plugins import h_pandas
 
 try:
     import git
@@ -283,7 +284,7 @@ class Driver(driver.Driver):
         :param dagworks_ui_url: Optional. URL to use for the DAGWorks UI.
         """
         if adapter is None:
-            adapter = base.SimplePythonGraphAdapter(result_builder=base.DictResult())
+            adapter = h_pandas.SimplePythonGraphAdapter(result_builder=base.DictResult())
         super(Driver, self).__init__(config, *modules, adapter=adapter)
 
         self.config = config

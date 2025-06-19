@@ -36,8 +36,8 @@ def group_by_mean(df: nw.DataFrame) -> nw.DataFrame:
 
 if __name__ == "__main__":
     import __main__ as example
-    from hamilton import base, driver
-    from hamilton.plugins import h_narwhals, h_polars
+    from hamilton import driver
+    from hamilton.plugins import h_narwhals, h_pandas, h_polars
 
     # pandas
     dr = (
@@ -46,7 +46,7 @@ if __name__ == "__main__":
         .with_modules(example)
         .with_adapters(
             h_narwhals.NarwhalsAdapter(),
-            h_narwhals.NarwhalsDataFrameResultBuilder(base.PandasDataFrameResult()),
+            h_narwhals.NarwhalsDataFrameResultBuilder(h_pandas.PandasDataFrameResult()),
         )
         .build()
     )

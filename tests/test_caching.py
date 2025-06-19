@@ -7,6 +7,7 @@ import pytest
 from hamilton import base
 from hamilton.driver import Driver
 from hamilton.experimental import h_cache
+from hamilton.plugins import h_pandas
 
 from tests import nodes
 
@@ -151,7 +152,7 @@ def test_dispatch(tmp_path, caplog):
     cache_path = str(tmp_path)
     adapter = h_cache.CachingGraphAdapter(
         cache_path,
-        base.PandasDataFrameResult(),
+        h_pandas.PandasDataFrameResult(),
     )
     dr = Driver(
         {},
@@ -190,7 +191,7 @@ def test_dispatch(tmp_path, caplog):
     # now we force-compute one of the dependencies
     adapter = h_cache.CachingGraphAdapter(
         cache_path,
-        base.PandasDataFrameResult(),
+        h_pandas.PandasDataFrameResult(),
         force_compute={"my_df"},
     )
     dr = Driver(

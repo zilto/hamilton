@@ -1,8 +1,8 @@
 import logging
 import sys
 
-from hamilton import base, driver
-from hamilton.plugins import h_polars_lazyframe
+from hamilton import driver
+from hamilton.plugins import h_pandas, h_polars_lazyframe
 
 logging.basicConfig(stream=sys.stdout)
 
@@ -10,7 +10,9 @@ logging.basicConfig(stream=sys.stdout)
 # h_polars.PolarsDataFrameResult() and you don't need to run collect at the end. Which you use
 # probably depends on whether you want to use the LazyFrame in more nodes in another DAG before
 # computing the result.
-adapter = base.SimplePythonGraphAdapter(result_builder=h_polars_lazyframe.PolarsLazyFrameResult())
+adapter = h_pandas.SimplePythonGraphAdapter(
+    result_builder=h_polars_lazyframe.PolarsLazyFrameResult()
+)
 import my_functions  # where our functions are defined
 
 dr = driver.Driver({}, my_functions, adapter=adapter)

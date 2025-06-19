@@ -5,7 +5,8 @@ import uvicorn
 from components import aggregations, data_loaders, features, joins, model
 from fastapi import FastAPI
 
-from hamilton import base, driver
+from hamilton import driver
+from hamilton.plugins import h_pandas
 
 app = FastAPI()
 dr = driver.Driver(
@@ -15,7 +16,7 @@ dr = driver.Driver(
     joins,
     features,
     model,
-    adapter=base.DefaultAdapter(),
+    adapter=h_pandas.DefaultAdapter(),
 )
 
 

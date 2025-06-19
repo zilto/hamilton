@@ -27,8 +27,6 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
 ]
 dependencies = [
-    "numpy",
-    "pandas",
     "typing_extensions > 4.0.0",
     "typing_inspect",
 ]
@@ -149,7 +147,7 @@ test = [
 tqdm = ["tqdm"]
 ui = ["sf-hamilton-ui"]
 vaex = ["vaex"]
-visualization = ["graphviz", "networkx"]
+visualization = ["graphviz"]
 
 [project.entry-points.console_scripts]
 h_experiments = "hamilton.plugins.h_experiments.__main__:main"

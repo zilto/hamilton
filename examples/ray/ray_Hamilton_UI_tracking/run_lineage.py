@@ -1,7 +1,8 @@
 import click
 import ray_lineage
 
-from hamilton import base, driver
+from hamilton import driver
+from hamilton.plugins import h_pandas
 from hamilton.plugins.h_ray import RayGraphAdapter
 from hamilton_sdk import adapters
 
@@ -16,7 +17,7 @@ def run(project_id, username):
             username=username,
             dag_name="telemetry_with_ray",
         )
-        rga = RayGraphAdapter(result_builder=base.PandasDataFrameResult())
+        rga = RayGraphAdapter(result_builder=h_pandas.PandasDataFrameResult())
         dr_ray = driver.Builder().with_modules(ray_lineage).with_adapters(rga, tracker_ray).build()
         result_ray = dr_ray.execute(
             final_vars=[

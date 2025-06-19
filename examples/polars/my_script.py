@@ -1,13 +1,13 @@
 import logging
 import sys
 
-from hamilton import base, driver
-from hamilton.plugins import h_polars
+from hamilton import driver
+from hamilton.plugins import h_pandas, h_polars
 
 logging.basicConfig(stream=sys.stdout)
 
 # Create a driver instance.
-adapter = base.SimplePythonGraphAdapter(result_builder=h_polars.PolarsDataFrameResult())
+adapter = h_pandas.SimplePythonGraphAdapter(result_builder=h_polars.PolarsDataFrameResult())
 config = {
     "base_df_location": "dummy_value",
 }

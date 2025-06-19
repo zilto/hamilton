@@ -3,7 +3,8 @@ from typing import Dict
 import my_functions
 from pandas import DataFrame
 
-from hamilton import base, driver, lifecycle
+from hamilton import driver, lifecycle
+from hamilton.plugins import h_pandas
 
 driver = (
     driver.Builder()
@@ -13,7 +14,7 @@ driver = (
         # this is a strict type checker for the input and output of each function.
         lifecycle.FunctionInputOutputTypeChecker(),
         # this will make execute return a pandas dataframe as a result
-        base.PandasDataFrameResult(),
+        h_pandas.PandasDataFrameResult(),
     )
     .build()
 )

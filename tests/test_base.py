@@ -7,6 +7,7 @@ import pytest
 from numpy import testing
 
 from hamilton import base
+from hamilton.plugins import h_numpy, h_pandas
 
 
 def test_numpymatrixresult_int():
@@ -15,7 +16,7 @@ def test_numpymatrixresult_int():
         a=np.array([1, 7, 3, 7, 3, 6, 4, 9, 5, 0]), b=np.zeros(10), c=1
     )
     expected = np.array([[1, 7, 3, 7, 3, 6, 4, 9, 5, 0], np.zeros(10), np.ones(10)]).T
-    actual = base.NumpyMatrixResult().build_result(**outputs)
+    actual = h_numpy.NumpyMatrixResult().build_result(**outputs)
     testing.assert_array_equal(actual, expected)
 
 
@@ -25,7 +26,7 @@ def test_numpymatrixresult_raise_length_mismatch():
         a=np.array([1, 7, 3, 7, 3, 6, 4, 9, 5, 0]), b=np.array([1, 2, 3, 4, 5]), c=1
     )
     with pytest.raises(ValueError):
-        base.NumpyMatrixResult().build_result(**outputs)
+        h_numpy.NumpyMatrixResult().build_result(**outputs)
 
 
 def test_SimplePythonGraphAdapter():
@@ -37,7 +38,7 @@ def test_SimplePythonGraphAdapter():
             outputs.update({"esoteric": "function"})
             return outputs
 
-    spga = base.SimplePythonGraphAdapter(Foo())
+    spga = h_pandas.SimplePythonGraphAdapter(Foo())
     cols = {"a": "b"}
     expected = {"a": "b", "esoteric": "function"}
     actual = spga.build_result(**cols)
@@ -181,7 +182,7 @@ class _Foo:
 )
 def test_PandasDataFrameResult_build_result(outputs, expected_result):
     """Tests the happy case of PandasDataFrameResult.build_result()"""
-    pdfr = base.PandasDataFrameResult()
+    pdfr = h_pandas.PandasDataFrameResult()
     actual = pdfr.build_result(**outputs)
     pd.testing.assert_frame_equal(actual, expected_result)
 
@@ -203,7 +204,7 @@ def test_PandasDataFrameResult_build_result(outputs, expected_result):
 )
 def test_PandasDataFrameResult_build_result_errors(outputs):
     """Tests the error case of PandasDataFrameResult.build_result()"""
-    pdfr = base.PandasDataFrameResult()
+    pdfr = h_pandas.PandasDataFrameResult()
     with pytest.raises(ValueError):
         pdfr.build_result(**outputs)
 
@@ -271,7 +272,7 @@ def test_PandasDataFrameResult_build_result_errors(outputs):
 )
 def test_PandasDataFrameResult_build_dataframe_with_dataframes(outputs, expected_result):
     """Tests build_dataframe_with_dataframes errors as expected"""
-    pdfr = base.PandasDataFrameResult()
+    pdfr = h_pandas.PandasDataFrameResult()
     actual = pdfr.build_dataframe_with_dataframes(outputs)
     pd.testing.assert_frame_equal(actual, expected_result)
 
@@ -352,7 +353,7 @@ PD_VERSION = tuple(int(item) for item in pd.__version__.split("."))
 )
 def test_PandasDataFrameResult_pandas_index_types(outputs, expected_result):
     """Tests exercising the function to return pandas index types from outputs"""
-    pdfr = base.PandasDataFrameResult()
+    pdfr = h_pandas.PandasDataFrameResult()
     actual = pdfr.pandas_index_types(outputs)
     assert dict(actual[0]) == expected_result[0]
     assert dict(actual[1]) == expected_result[1]
@@ -385,7 +386,7 @@ def test_PandasDataFrameResult_check_pandas_index_types_match(
 
     logger = logging.getLogger("hamilton.base")  # get logger of base module.
     logger.setLevel(logging.DEBUG)
-    pdfr = base.PandasDataFrameResult()
+    pdfr = h_pandas.PandasDataFrameResult()
     actual = pdfr.check_pandas_index_types_match(all_index_types, time_indexes, no_indexes)
     assert actual == expected_result
 
@@ -442,7 +443,7 @@ def test_PandasDataFrameResult_check_pandas_index_types_match(
 )
 def test_StrictIndexTypePandasDataFrameResult_build_result(outputs, expected_result):
     """Tests the happy case of StrictIndexTypePandasDataFrameResult.build_result()"""
-    sitpdfr = base.StrictIndexTypePandasDataFrameResult()
+    sitpdfr = h_pandas.StrictIndexTypePandasDataFrameResult()
     actual = sitpdfr.build_result(**outputs)
     pd.testing.assert_frame_equal(actual, expected_result)
 
@@ -487,6 +488,6 @@ def test_StrictIndexTypePandasDataFrameResult_build_result(outputs, expected_res
 )
 def test_StrictIndexTypePandasDataFrameResult_build_result_errors(outputs):
     """Tests the error case of StrictIndexTypePandasDataFrameResult.build_result()"""
-    sitpdfr = base.StrictIndexTypePandasDataFrameResult()
+    sitpdfr = h_pandas.StrictIndexTypePandasDataFrameResult()
     with pytest.raises(ValueError):
         sitpdfr.build_result(**outputs)

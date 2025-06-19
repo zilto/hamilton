@@ -4,8 +4,8 @@ import sys
 
 import pandas as pd
 
-from hamilton import base, driver
-from hamilton.plugins import h_dask
+from hamilton import driver
+from hamilton.plugins import h_dask, h_pandas
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +28,7 @@ if __name__ == "__main__":
     modules = [importlib.import_module(m) for m in module_names]
     dga = h_dask.DaskGraphAdapter(
         client,
-        base.PandasDataFrameResult(),
+        h_pandas.PandasDataFrameResult(),
         visualize_kwargs={"filename": "run_with_delayed", "format": "png"},
         use_delayed=True,
         compute_at_end=True,

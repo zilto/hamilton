@@ -69,10 +69,6 @@ mutate = macros.mutate
 step = macros.step
 apply_to = macros.apply_to
 
-# resolve transform/model decorator
-dynamic_transform = macros.dynamic_transform
-model = macros.model
-
 # Metadata-specifying decorators
 tag = metadata.tag
 tag_outputs = metadata.tag_outputs

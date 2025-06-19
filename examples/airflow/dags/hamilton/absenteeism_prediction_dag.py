@@ -119,7 +119,8 @@ def absenteeism_prediction_dag():
         """Train and evaluate a machine learning model"""
         from absenteeism import evaluate_model, train_model
 
-        from hamilton import base, driver
+        from hamilton import driver
+        from hamilton.plugins import h_pandas
 
         context = get_current_context()
         PARAMS = context["params"]
@@ -129,7 +130,7 @@ def absenteeism_prediction_dag():
             hamilton_config,
             train_model,
             evaluate_model,  # pass two function module to the Hamilton driver
-            adapter=base.DefaultAdapter(),
+            adapter=h_pandas.DefaultAdapter(),
         )
 
         results = dr.execute(

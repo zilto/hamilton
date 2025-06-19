@@ -6,8 +6,9 @@ import arxiv_articles
 import pandas as pd
 import summarize_text
 
-from hamilton import base, driver
+from hamilton import driver
 from hamilton.execution.executors import MultiThreadingExecutor
+from hamilton.plugins import h_pandas
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +25,7 @@ def get_articles(query: str) -> pd.DataFrame:
         .with_modules(arxiv_articles)
         .with_config({"mock_openai": True})
         .with_remote_executor(MultiThreadingExecutor(max_tasks=10))
-        .with_adapter(base.SimplePythonDataFrameGraphAdapter())
+        .with_adapter(h_pandas.SimplePythonDataFrameGraphAdapter())
         .build()
     )
 
@@ -47,7 +48,7 @@ def read_article_and_summarize(query: str) -> str:
     :param query: Description of the article in plain text based on the user's query.
     :return: Summarized text of the article given the query.
     """
-    dr = driver.Driver({}, summarize_text, adapter=base.DefaultAdapter())
+    dr = driver.Driver({}, summarize_text, adapter=h_pandas.DefaultAdapter())
     inputs = {
         "embedding_model_name": "text-embedding-ada-002",
         "openai_gpt_model": "gpt-3.5-turbo-0613",

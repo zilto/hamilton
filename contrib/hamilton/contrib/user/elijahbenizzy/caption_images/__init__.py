@@ -170,12 +170,13 @@ if __name__ == "__main__":
     # run as a script to test Hamilton's execution
     import __init__ as image_captioning
 
-    from hamilton import base, driver
+    from hamilton import driver
+    from hamilton.plugins import h_pandas
 
     dr = driver.Driver(
         {"include_embeddings": True},  # CONFIG: fill as appropriate
         image_captioning,
-        adapter=base.DefaultAdapter(),
+        adapter=h_pandas.DefaultAdapter(),
     )
     # saves to current working directory creating dag.png.
     dr.display_all_functions("dag", {"format": "png", "view": False}, show_legend=False)

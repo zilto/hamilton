@@ -489,14 +489,8 @@ def get_result_builder_name(adapter: lifecycle_base.LifecycleAdapterSet) -> str:
     if hasattr(class_to_inspect, "result_builder"):
         class_to_inspect = class_to_inspect.result_builder
     # Go by class itself
-    if isinstance(class_to_inspect, base.StrictIndexTypePandasDataFrameResult):
-        result_builder_name = "hamilton.base.StrictIndexTypePandasDataFrameResult"
-    elif isinstance(class_to_inspect, base.PandasDataFrameResult):
-        result_builder_name = "hamilton.base.PandasDataFrameResult"
-    elif isinstance(class_to_inspect, base.DictResult):
+    if isinstance(class_to_inspect, base.DictResult):
         result_builder_name = "hamilton.base.DictResult"
-    elif isinstance(class_to_inspect, base.NumpyMatrixResult):
-        result_builder_name = "hamilton.base.NumpyMatrixResult"
     else:
         result_builder_name = "custom_builder"
     return result_builder_name

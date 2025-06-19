@@ -5,7 +5,7 @@ import pandas as pd
 import pytest
 
 import hamilton.function_modifiers
-from hamilton import async_driver, base, driver, function_modifiers, models, node
+from hamilton import async_driver, driver, node
 from hamilton.function_modifiers import does
 from hamilton.function_modifiers.dependencies import source, value
 from hamilton.function_modifiers.macros import (
@@ -18,6 +18,7 @@ from hamilton.function_modifiers.macros import (
     step,
 )
 from hamilton.node import DependencyType
+from hamilton.plugins import h_pandas
 
 import tests.resources.mutate
 import tests.resources.mutate_async
@@ -198,44 +199,6 @@ def test_does_with_argument_mapping():
     assert node_.callable(parama=0, paramb=1, paramc=2) == 2
     assert node_.callable(parama=1, paramb=4) == 9
     assert node_.documentation == to_modify.__doc__
-
-
-def test_model_modifier():
-    config = {
-        "my_column_model_params": {
-            "col_1": 0.5,
-            "col_2": 0.5,
-        }
-    }
-
-    class LinearCombination(models.BaseModel):
-        def get_dependents(self) -> List[str]:
-            return list(self.config_parameters.keys())
-
-        def predict(self, **columns: pd.Series) -> pd.Series:
-            return sum(
-                self.config_parameters[column_name] * column
-                for column_name, column in columns.items()
-            )
-
-    def my_column() -> pd.Series:
-        """Column that will be annotated by a model"""
-        pass
-
-    annotation = function_modifiers.model(LinearCombination, "my_column_model_params")
-    annotation.validate(my_column)
-    (model_node,) = annotation.generate_nodes(my_column, config)
-    assert model_node.input_types["col_1"][0] == model_node.input_types["col_2"][0] == pd.Series
-    assert model_node.type == pd.Series
-    pd.testing.assert_series_equal(
-        model_node.callable(col_1=pd.Series([1]), col_2=pd.Series([2])), pd.Series([1.5])
-    )
-
-    def bad_model(col_1: pd.Series, col_2: pd.Series) -> pd.Series:
-        return col_1 * 0.5 + col_2 * 0.5
-
-    with pytest.raises(hamilton.function_modifiers.base.InvalidDecoratorException):
-        annotation.validate(bad_model)
 
 
 def _test_apply_function(foo: int, bar: int, baz: int = 100) -> int:
@@ -647,7 +610,7 @@ def test_pipe_end_to_end_1():
     dr = (
         driver.Builder()
         .with_modules(tests.resources.pipe_input)
-        .with_adapter(base.DefaultAdapter())
+        .with_adapter(h_pandas.DefaultAdapter())
         .with_config({"calc_c": True})
         .build()
     )
@@ -674,7 +637,7 @@ def test_pipe_end_to_end_target_global():
     dr = (
         driver.Builder()
         .with_modules(tests.resources.pipe_input)
-        .with_adapter(base.DefaultAdapter())
+        .with_adapter(h_pandas.DefaultAdapter())
         .with_config({"calc_c": True})
         .build()
     )
@@ -936,7 +899,7 @@ def test_pipe_output_end_to_end_simple():
     dr = (
         driver.Builder()
         .with_modules(tests.resources.pipe_output)
-        .with_adapter(base.DefaultAdapter())
+        .with_adapter(h_pandas.DefaultAdapter())
         .build()
     )
 
@@ -955,7 +918,7 @@ def test_pipe_output_end_to_end():
     dr = (
         driver.Builder()
         .with_modules(tests.resources.pipe_output)
-        .with_adapter(base.DefaultAdapter())
+        .with_adapter(h_pandas.DefaultAdapter())
         .with_config({"calc_c": True})
         .build()
     )
@@ -988,7 +951,7 @@ def test_pipe_output_end_to_end_with_config():
     dr = (
         driver.Builder()
         .with_modules(tests.resources.pipe_output)
-        .with_adapter(base.DefaultAdapter())
+        .with_adapter(h_pandas.DefaultAdapter())
         .with_config({"key": "Yes"})
         .build()
     )
@@ -1007,7 +970,7 @@ def test_pipe_output_end_to_end_with_config():
     dr = (
         driver.Builder()
         .with_modules(tests.resources.pipe_output)
-        .with_adapter(base.DefaultAdapter())
+        .with_adapter(h_pandas.DefaultAdapter())
         .with_config({"key": "No"})
         .build()
     )
@@ -1026,7 +989,7 @@ def test_pipe_output_end_to_end_with_config():
     dr = (
         driver.Builder()
         .with_modules(tests.resources.pipe_output)
-        .with_adapter(base.DefaultAdapter())
+        .with_adapter(h_pandas.DefaultAdapter())
         .with_config({"key": "skip"})
         .build()
     )
@@ -1112,7 +1075,7 @@ def test_mutate_end_to_end_simple(import_mutate_module):
     dr = (
         driver.Builder()
         .with_modules(import_mutate_module)
-        .with_adapter(base.DefaultAdapter())
+        .with_adapter(h_pandas.DefaultAdapter())
         .build()
     )
 
@@ -1131,7 +1094,7 @@ def test_mutate_end_to_end_1(import_mutate_module):
     dr = (
         driver.Builder()
         .with_modules(import_mutate_module)
-        .with_adapter(base.DefaultAdapter())
+        .with_adapter(h_pandas.DefaultAdapter())
         .with_config({"calc_c": True})
         .build()
     )

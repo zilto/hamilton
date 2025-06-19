@@ -2,8 +2,8 @@ import pandas as pd
 import pytest
 import ray
 
-from hamilton import base, driver
-from hamilton.plugins import h_ray
+from hamilton import driver
+from hamilton.plugins import h_pandas, h_ray
 
 from .resources import example_module, smoke_screen_module
 
@@ -27,7 +27,7 @@ def test_ray_graph_adapter(init):
     dr = driver.Driver(
         initial_columns,
         example_module,
-        adapter=h_ray.RayGraphAdapter(base.PandasDataFrameResult()),
+        adapter=h_ray.RayGraphAdapter(h_pandas.PandasDataFrameResult()),
     )
     output_columns = [
         "spend",
@@ -51,7 +51,7 @@ def test_smoke_screen_module(init):
     dr = driver.Driver(
         config,
         smoke_screen_module,
-        adapter=h_ray.RayGraphAdapter(base.PandasDataFrameResult()),
+        adapter=h_ray.RayGraphAdapter(h_pandas.PandasDataFrameResult()),
     )
     output_columns = [
         "raw_acquisition_cost",

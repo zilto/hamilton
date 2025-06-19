@@ -112,12 +112,13 @@ def all_converted_and_saved(converted_and_saved: Collect[Converted]) -> List[Con
 if __name__ == "__main__":
     import __init__ as convert_images
 
-    from hamilton import base, driver
+    from hamilton import driver
+    from hamilton.plugins import h_pandas
 
     dr = driver.Driver(
         {},
         convert_images,
-        adapter=base.DefaultAdapter(),
+        adapter=h_pandas.DefaultAdapter(),
     )
     # saves to current working directory creating dag.png.
     dr.display_all_functions("dag", {"format": "png", "view": False}, show_legend=False)

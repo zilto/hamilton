@@ -18,6 +18,7 @@ from hamilton.io.materialization import (
     to,
 )
 from hamilton.lifecycle import base as lifecycle_base
+from hamilton.plugins import h_pandas
 
 import tests.resources.cyclic_functions
 import tests.resources.test_default_args
@@ -128,7 +129,7 @@ def test_extractor_factory_generates_nodes():
 
     base_node = node.Node.from_fn(test)
     nodes_without_dependencies = graph.update_dependencies(
-        {base_node.name: base_node}, lifecycle_base.LifecycleAdapterSet(base.DefaultAdapter())
+        {base_node.name: base_node}, lifecycle_base.LifecycleAdapterSet(h_pandas.DefaultAdapter())
     )
     fn_graph = graph.FunctionGraph(nodes_without_dependencies, {})
     nodes = factory.generate_nodes(fn_graph)

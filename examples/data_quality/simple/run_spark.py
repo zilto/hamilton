@@ -21,8 +21,8 @@ import feature_logic
 import pyspark.pandas as ps
 from pyspark.sql import SparkSession
 
-from hamilton import base, driver, log_setup
-from hamilton.plugins import h_spark
+from hamilton import driver, log_setup
+from hamilton.plugins import h_pandas, h_spark
 
 if __name__ == "__main__":
     log_setup.setup_logging(log_level=log_setup.LOG_LEVELS["INFO"])
@@ -38,7 +38,7 @@ if __name__ == "__main__":
     config = {"location": "Absenteeism_at_work.csv", "execution": "spark"}
     skga = h_spark.SparkKoalasGraphAdapter(
         spark_session=spark,
-        result_builder=base.PandasDataFrameResult(),
+        result_builder=h_pandas.PandasDataFrameResult(),
         # result_builder=h_spark.KoalasDataFrameResult(),
         spine_column="index_col",
     )

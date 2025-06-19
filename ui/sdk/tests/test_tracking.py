@@ -11,6 +11,7 @@ from hamilton_sdk.tracking.trackingtypes import Status, TaskRun
 
 from hamilton import base
 from hamilton.io.materialization import to
+from hamilton.plugins import h_pandas
 
 import tests.resources.basic_dag_with_config
 
@@ -109,7 +110,7 @@ def test_tracking_auto_initializes():
         api_key="foo",
         username="elijah@dagworks.io",
         client_factory=MockHamiltonClient,
-        adapter=base.SimplePythonGraphAdapter(result_builder=base.DictResult()),
+        adapter=h_pandas.SimplePythonGraphAdapter(result_builder=base.DictResult()),
         dag_name="test-tracking-auto-initializes",
     )
     dr.execute(final_vars=["c"], inputs={"a": 1})
@@ -124,7 +125,7 @@ def test_tracking_doesnt_break_standard_execution():
         api_key="foo",
         username="elijah@dagworks.io",
         client_factory=MockHamiltonClient,
-        adapter=base.SimplePythonGraphAdapter(result_builder=base.DictResult()),
+        adapter=h_pandas.SimplePythonGraphAdapter(result_builder=base.DictResult()),
         dag_name="test-tracking-doesnt-break-standard-execution",
     )
     result = dr.execute(final_vars=["c"], inputs={"a": 1})
@@ -142,7 +143,7 @@ def test_tracking_apis_get_called():
         api_key="foo",
         username="elijah@dagworks.io",
         client_factory=MockHamiltonClient,
-        adapter=base.SimplePythonGraphAdapter(result_builder=base.DictResult()),
+        adapter=h_pandas.SimplePythonGraphAdapter(result_builder=base.DictResult()),
         dag_name="test-tracking-apis-get-called",
     )
     dr.initialize()
@@ -207,7 +208,7 @@ def test_tracking_apis_get_called_failure():
         api_key="foo",
         username="elijah@dagworks.io",
         client_factory=MockHamiltonClient,
-        adapter=base.SimplePythonGraphAdapter(result_builder=base.DictResult()),
+        adapter=h_pandas.SimplePythonGraphAdapter(result_builder=base.DictResult()),
         dag_name="test-tracking-apis-get-called",
     )
     dr.initialize()
@@ -240,7 +241,7 @@ def test_tracking_apis_get_called_materialize():
         api_key="foo",
         username="elijah@dagworks.io",
         client_factory=MockHamiltonClient,
-        adapter=base.SimplePythonGraphAdapter(result_builder=base.DictResult()),
+        adapter=h_pandas.SimplePythonGraphAdapter(result_builder=base.DictResult()),
         dag_name="test-tracking-apis-get-called",
     )
     dr.initialize()

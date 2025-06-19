@@ -11,6 +11,7 @@ from tenacity import retry, stop_after_attempt, wait_random_exponential
 from tqdm import tqdm
 
 from hamilton.function_modifiers import config
+from hamilton.plugins import h_pandas
 
 """
 This module is a carbon copy of the module in the backend. In real life you'd
@@ -179,6 +180,6 @@ if __name__ == "__main__":
     dr = driver.Driver(
         {},
         summarization,
-        adapter=base.SimplePythonGraphAdapter(base.DictResult()),
+        adapter=h_pandas.SimplePythonGraphAdapter(base.DictResult()),
     )
     dr.display_all_functions("summary", {"format": "png"})

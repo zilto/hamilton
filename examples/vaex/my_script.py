@@ -1,13 +1,13 @@
 import logging
 import sys
 
-from hamilton import base, driver
-from hamilton.plugins import h_vaex
+from hamilton import driver
+from hamilton.plugins import h_pandas, h_vaex
 
 logging.basicConfig(stream=sys.stdout)
 
 # Create a driver instance.
-adapter = base.SimplePythonGraphAdapter(result_builder=h_vaex.VaexDataFrameResult())
+adapter = h_pandas.SimplePythonGraphAdapter(result_builder=h_vaex.VaexDataFrameResult())
 config = {
     "base_df_location": "dummy_value",
 }

@@ -6,6 +6,8 @@ It should only house the graph & things required to create and traverse one.
 Note: one should largely consider the code in this module to be "private".
 """
 
+from __future__ import annotations
+
 import html
 import inspect
 import logging
@@ -13,8 +15,19 @@ import os.path
 import pathlib
 import uuid
 from enum import Enum
-from types import FunctionType, ModuleType
-from typing import Any, Callable, Collection, Dict, FrozenSet, List, Optional, Set, Tuple, Type
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Collection,
+    Dict,
+    FrozenSet,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    Type,
+)
 
 import hamilton.lifecycle.base as lifecycle_base
 from hamilton import graph_types, node
@@ -24,6 +37,9 @@ from hamilton.function_modifiers.metadata import schema
 from hamilton.graph_utils import find_functions
 from hamilton.htypes import get_type_as_string, types_match
 from hamilton.node import Node
+
+if TYPE_CHECKING:
+    from types import FunctionType, ModuleType
 
 logger = logging.getLogger(__name__)
 
@@ -664,30 +680,6 @@ def create_graphviz_graph(
     return digraph
 
 
-def create_networkx_graph(
-    nodes: Set[node.Node], user_nodes: Set[node.Node], name: str
-) -> "networkx.DiGraph":  # noqa: F821
-    """Helper function to create a networkx graph.
-
-    :param nodes: The set of computational nodes
-    :param user_nodes: The set of nodes that the user is providing inputs for.
-    :param name: The name to have on the graph.
-    :return: a graphviz.Digraph; use this to render/save a graph representation.
-    """
-    import networkx
-
-    digraph = networkx.DiGraph(name=name)
-    for n in nodes:
-        digraph.add_node(n.name, label=n.name)
-    for n in user_nodes:
-        digraph.add_node(n.name, label=f"UD: {n.name}")
-
-    for n in list(nodes) + list(user_nodes):
-        for d in n.dependencies:
-            digraph.add_edge(d.name, n.name)
-    return digraph
-
-
 class FunctionGraph:
     """Note: this object should be considered private until stated otherwise.
 
@@ -868,35 +860,6 @@ class FunctionGraph:
             config=self._config,
             keep_dot=keep_dot,
         )
-
-    def has_cycles(self, nodes: Set[node.Node], user_nodes: Set[node.Node]) -> bool:
-        """Checks that the graph created does not contain cycles.
-
-        :param nodes: the set of nodes that need to be computed.
-        :param user_nodes: the set of inputs that the user provided.
-        :return: bool. True if cycles detected. False if not.
-        """
-        cycles = self.get_cycles(nodes, user_nodes)
-        return True if cycles else False
-
-    def get_cycles(self, nodes: Set[node.Node], user_nodes: Set[node.Node]) -> List[List[str]]:
-        """Returns cycles found in the graph.
-
-        :param nodes: the set of nodes that need to be computed.
-        :param user_nodes: the set of inputs that the user provided.
-        :return: list of cycles, which is a list of node names.
-        """
-        try:
-            import networkx
-        except ModuleNotFoundError:
-            logger.exception(
-                " networkx is required for detecting cycles in the function graph. Install it with:"
-                '\n\n  pip install "sf-hamilton[visualization]" or pip install networkx \n\n'
-            )
-            return []
-        digraph = create_networkx_graph(nodes, user_nodes, "Dependency Graph")
-        cycles = list(networkx.simple_cycles(digraph))
-        return cycles
 
     @staticmethod
     def display(

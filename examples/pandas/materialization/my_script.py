@@ -7,8 +7,9 @@ import pandas as pd
 # Add the hamilton module to your path - optional before hamilton import
 # project_dir = "### ADD PATH HERE ###"
 # sys.path.append(project_dir)
-from hamilton import base, driver
+from hamilton import driver
 from hamilton.io.materialization import to
+from hamilton.plugins import h_pandas
 
 logging.basicConfig(stream=sys.stdout)
 initial_columns = {  # load from actuals or wherever -- this is our initial data we use as input.
@@ -24,7 +25,7 @@ initial_columns = {  # load from actuals or wherever -- this is our initial data
 
 import my_functions
 
-df_builder = base.PandasDataFrameResult()
+df_builder = h_pandas.PandasDataFrameResult()
 
 dr = driver.Driver({}, my_functions)  # can pass in multiple modules
 # we need to specify what we want in the final dataframe. These can be string names, or function references.

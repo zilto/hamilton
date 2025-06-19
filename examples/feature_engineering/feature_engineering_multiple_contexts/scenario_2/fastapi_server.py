@@ -17,8 +17,8 @@ import online_loader
 import pandas as pd
 import pydantic
 
-from hamilton import base
 from hamilton.experimental import h_async
+from hamilton.plugins import h_pandas
 
 app = fastapi.FastAPI()
 
@@ -57,7 +57,7 @@ dr = h_async.AsyncDriver(
     {"feature_client": feature_client, "execution_mode": "online"},
     online_loader,  # includes code to load data from the feature store.
     features,  # shared module of feature logic
-    result_builder=base.SimplePythonDataFrameGraphAdapter(),
+    result_builder=h_pandas.SimplePythonDataFrameGraphAdapter(),
 )
 
 

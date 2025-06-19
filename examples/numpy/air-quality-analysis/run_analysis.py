@@ -1,6 +1,7 @@
 import analysis_flow
 
-from hamilton import base, driver
+from hamilton import driver
+from hamilton.plugins import h_numpy, h_pandas
 
 """
 Run this analysis by doing `python run_analysis.py`.
@@ -14,7 +15,7 @@ https://github.com/numpy/numpy-tutorials/blob/main/content/tutorial-air-quality-
 
 if __name__ == "__main__":
     # let's create a dictionary result -- since we want to get a few things from execution for inspection
-    adapter = base.DefaultAdapter()
+    adapter = h_pandas.DefaultAdapter()
     # adapter = base.SimplePythonGraphAdapter(base.NumpyMatrixResult())  # could also get a numpy matrix back.
     dr = driver.Driver(
         {
@@ -34,7 +35,7 @@ if __name__ == "__main__":
 
     # Just to show you, from a dict result, it's easy to use another ResultMixin to build another result.
     # This can be an easy way to try out/prototype what you want to do next -- before committing to it.
-    sample_matrix = base.NumpyMatrixResult().build_result(
+    sample_matrix = h_numpy.NumpyMatrixResult().build_result(
         before_sample=result["before_sample"], after_sample=result["after_sample"]
     )
     print(sample_matrix)

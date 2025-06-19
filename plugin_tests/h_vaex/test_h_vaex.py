@@ -1,14 +1,14 @@
 import numpy as np
 import vaex
 
-from hamilton import base, driver
-from hamilton.plugins import h_vaex, vaex_extensions  # noqa F401
+from hamilton import driver
+from hamilton.plugins import h_pandas, h_vaex, vaex_extensions  # noqa F401
 
 from .resources import functions
 
 
 def test_vaex_column_from_expression():
-    adapter = base.SimplePythonGraphAdapter(result_builder=h_vaex.VaexDataFrameResult())
+    adapter = h_pandas.SimplePythonGraphAdapter(result_builder=h_vaex.VaexDataFrameResult())
     dr = driver.Driver({}, functions, adapter=adapter)
     result_df = dr.execute(["a", "b", "a_plus_b_expression"])
     assert isinstance(result_df, vaex.dataframe.DataFrame)
@@ -16,7 +16,7 @@ def test_vaex_column_from_expression():
 
 
 def test_vaex_column_from_nparray():
-    adapter = base.SimplePythonGraphAdapter(result_builder=h_vaex.VaexDataFrameResult())
+    adapter = h_pandas.SimplePythonGraphAdapter(result_builder=h_vaex.VaexDataFrameResult())
     dr = driver.Driver({}, functions, adapter=adapter)
     result_df = dr.execute(["a", "b", "a_plus_b_nparray"])
     assert isinstance(result_df, vaex.dataframe.DataFrame)
@@ -24,7 +24,7 @@ def test_vaex_column_from_nparray():
 
 
 def test_vaex_scalar_among_columns():
-    adapter = base.SimplePythonGraphAdapter(result_builder=h_vaex.VaexDataFrameResult())
+    adapter = h_pandas.SimplePythonGraphAdapter(result_builder=h_vaex.VaexDataFrameResult())
     dr = driver.Driver({}, functions, adapter=adapter)
     result_df = dr.execute(["a", "b", "a_mean"])
     assert isinstance(result_df, vaex.dataframe.DataFrame)
@@ -32,7 +32,7 @@ def test_vaex_scalar_among_columns():
 
 
 def test_vaex_only_scalars():
-    adapter = base.SimplePythonGraphAdapter(result_builder=h_vaex.VaexDataFrameResult())
+    adapter = h_pandas.SimplePythonGraphAdapter(result_builder=h_vaex.VaexDataFrameResult())
     dr = driver.Driver({}, functions, adapter=adapter)
     result_df = dr.execute(["a_mean", "b_mean"])
     assert isinstance(result_df, vaex.dataframe.DataFrame)
@@ -41,7 +41,7 @@ def test_vaex_only_scalars():
 
 
 def test_vaex_df_among_columns():
-    adapter = base.SimplePythonGraphAdapter(result_builder=h_vaex.VaexDataFrameResult())
+    adapter = h_pandas.SimplePythonGraphAdapter(result_builder=h_vaex.VaexDataFrameResult())
     dr = driver.Driver({}, functions, adapter=adapter)
     result_df = dr.execute(["a", "b", "ab_as_df"])
     assert isinstance(result_df, vaex.dataframe.DataFrame)

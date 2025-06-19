@@ -7,8 +7,8 @@ from typing import Any, Callable, Dict, Optional, Set, Type
 
 import typing_inspect
 
-from hamilton.base import SimplePythonGraphAdapter
 from hamilton.node import Node
+from hamilton.plugins.h_pandas import SimplePythonGraphAdapter
 
 logger = logging.getLogger(__name__)
 

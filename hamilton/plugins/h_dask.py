@@ -12,6 +12,7 @@ from dask.distributed import Client as DaskClient
 
 from hamilton import base, htypes, node
 from hamilton.execution import executors
+from hamilton.plugins import h_pandas
 
 logger = logging.getLogger(__name__)
 
@@ -108,7 +109,7 @@ class DaskGraphAdapter(base.HamiltonGraphAdapter):
             That is, should `.compute()` be called in the result builder to quick off computation.
         """
         self.client = dask_client
-        self.result_builder = result_builder if result_builder else base.PandasDataFrameResult()
+        self.result_builder = result_builder if result_builder else h_pandas.PandasDataFrameResult()
         self.visualize_kwargs = visualize_kwargs
         self.use_delayed = use_delayed
         self.compute_at_end = compute_at_end

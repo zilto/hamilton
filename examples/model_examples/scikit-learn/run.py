@@ -6,7 +6,8 @@ import digit_loader
 import iris_loader
 import my_train_evaluate_logic
 
-from hamilton import base, driver
+from hamilton import driver
+from hamilton.plugins import h_pandas
 
 
 def get_data_loader(data_set: str):
@@ -47,7 +48,7 @@ if __name__ == "__main__":
     # get module with functions to load data
     data_module = get_data_loader(_data_set)
     # set the desired result container we want
-    adapter = base.DefaultAdapter()
+    adapter = h_pandas.DefaultAdapter()
     """
     What's cool about this, is that by simply changing the `dag_config` and the `data_module` we can
     reuse the logic in the `my_train_evaluate_logic` module very easily for different contexts and purposes if

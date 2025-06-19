@@ -58,7 +58,16 @@ class AsyncGraphAdapter(lifecycle_base.BaseDoNodeExecute, lifecycle.ResultBuilde
             if async_lifecycle_adapters is not None
             else lifecycle_base.LifecycleAdapterSet()
         )
-        self.result_builder = result_builder if result_builder else base.PandasDataFrameResult()
+        if result_builder:
+            self.result_builder = result_builder
+        else:
+            try:
+                import hamilton.plugins.h_pandas
+            except Exception as e:
+                raise ImportError(
+                    "Failed to import Hamilton plugin `h_pandas` to use the legacy adapter. You need to install `pandas` dependency."
+                ) from e
+            self.result_builder = hamilton.plugins.h_pandas.PandasDataFrameResult()
         self.is_initialized = False
 
     def do_node_execute(

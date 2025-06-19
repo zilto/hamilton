@@ -8,9 +8,10 @@ importlib.import_module("adapters")
 
 from components import feature_data, model_evaluation, model_training
 
-from hamilton import base, driver
+from hamilton import driver
 from hamilton.function_modifiers import source
 from hamilton.io.materialization import ExtractorFactory, MaterializerFactory, from_, to
+from hamilton.plugins import h_pandas
 
 
 @click.group()
@@ -43,7 +44,7 @@ def get_materializers(which_stage: str) -> List[Union[MaterializerFactory, Extra
         to.csv(
             id="save_training_data",
             dependencies=["train_set"],
-            combine=base.PandasDataFrameResult(),
+            combine=h_pandas.PandasDataFrameResult(),
             path="./training_data.csv",
         ),
         to.png(

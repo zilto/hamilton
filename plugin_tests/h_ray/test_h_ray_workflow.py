@@ -3,8 +3,8 @@ import pytest
 import ray
 from ray import workflow
 
-from hamilton import base, driver
-from hamilton.plugins import h_ray
+from hamilton import driver
+from hamilton.plugins import h_pandas, h_ray
 from plugin_tests.h_ray.resources import example_module, smoke_screen_module
 
 
@@ -26,7 +26,7 @@ def test_ray_workflow_graph_adapter(init):
         initial_columns,
         example_module,
         adapter=h_ray.RayWorkflowGraphAdapter(
-            base.PandasDataFrameResult(), "test-test_ray_workflow_graph_adapter"
+            h_pandas.PandasDataFrameResult(), "test-test_ray_workflow_graph_adapter"
         ),
     )
     output_columns = [
@@ -53,7 +53,7 @@ def test_smoke_screen_module(init):
         config,
         smoke_screen_module,
         adapter=h_ray.RayWorkflowGraphAdapter(
-            base.PandasDataFrameResult(), "test-test_smoke_screen_module"
+            h_pandas.PandasDataFrameResult(), "test-test_smoke_screen_module"
         ),
     )
     output_columns = [
