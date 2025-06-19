@@ -20,7 +20,9 @@ if not registry.INITIALIZED:
     # Trigger load of extensions here because decorators are the only thing that use the registry
     # right now. Side note: ray serializes things weirdly, so we need to do this here rather than in
     # in the other choice of hamilton/base.py.
-    registry.initialize()
+    # NOTE commented out to disable autoloading
+    # registry.initialize()
+    pass
 
 
 def sanitize_function_name(name: str) -> str:
