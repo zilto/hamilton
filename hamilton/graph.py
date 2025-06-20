@@ -183,7 +183,7 @@ def compile_to_nodes(
         nodes = fg.nodes
 
     # create non-input nodes -- easier to just create this in one loop
-    for _func_name, f in functions:
+    for f in functions:
         for n in fm_base.resolve_nodes(f, config):
             if n.name in config:
                 continue  # This makes sure we overwrite things if they're in the config...
@@ -727,7 +727,7 @@ class FunctionGraph:
         """
         module_functions = sum([find_functions(module) for module in modules], [])
         nodes = compile_to_nodes(
-            *module_functions,
+            *(fn for _, fn in module_functions),
             *functions,
             config=config,
             adapter=adapter,
